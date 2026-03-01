@@ -42,17 +42,19 @@ export async function POST(request: NextRequest) {
       systemDescription: string;
     };
 
-    // Validate required fields (companyName and systemDescription get defaults)
-    if (!templateId || !result) {
+    // Validate required fields
+    const missingFields: string[] = [];
+    if (!templateId) missingFields.push("templateId");
+    if (!result) missingFields.push("result");
+    if (!companyName) missingFields.push("companyName");
+    if (!systemDescription) missingFields.push("systemDescription");
+
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { error: "Missing required fields: templateId, result" },
+        { error: `Missing required fields: ${missingFields.join(", ")}. Please fill in all required information before generating documents.` },
         { status: 400 }
       );
     }
-
-    const resolvedCompanyName = companyName || "Your Company";
-    const resolvedSystemDescription =
-      systemDescription || `AI system classified as ${result.classification} under EU AI Act`;
 
     // Validate template exists (unless executive summary)
     if (templateId !== "EXEC_SUMMARY" && !TEMPLATE_REGISTRY[templateId]) {
@@ -65,8 +67,8 @@ export async function POST(request: NextRequest) {
     // Generate the document
     const doc =
       templateId === "EXEC_SUMMARY"
-        ? await generateExecutiveSummary(result, resolvedCompanyName, resolvedSystemDescription)
-        : await generateDocument(templateId, result, resolvedCompanyName, resolvedSystemDescription);
+        ? await generateExecutiveSummary(result, companyName, systemDescription)
+        : await generateDocument(templateId, result, companyName, systemDescription);
 
     return NextResponse.json({ document: doc });
   } catch (error) {

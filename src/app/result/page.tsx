@@ -13,7 +13,7 @@ import Link from "next/link";
 export default function ResultPage() {
   const [result, setResult] = useState<ClassificationResult | null>(null);
   const [companyName, setCompanyName] = useState("Your Company");
-  const [systemDescription, setSystemDescription] = useState("AI system under EU AI Act assessment");
+  const [systemDescription, setSystemDescription] = useState("");
   const router = useRouter();
 
   useEffect(() => {

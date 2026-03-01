@@ -46,6 +46,49 @@ const resetStore = () => useWizardStore.getState().reset();
 
 const mockClassify = classifyAISystem as ReturnType<typeof vi.fn>;
 
+/** Fill required answers for a step so nextStep() validation passes */
+function fillStepAnswers(stepId: string) {
+  const { setAnswer } = useWizardStore.getState();
+  switch (stepId) {
+    case "company":
+      setAnswer("companyName", "Test Corp");
+      setAnswer("companySize", "MEDIUM");
+      setAnswer("isEUBased", true);
+      break;
+    case "role":
+      setAnswer("role", "PROVIDER");
+      break;
+    case "system":
+      setAnswer("systemDescription", "AI chatbot for customer service");
+      break;
+    case "exclusions":
+      setAnswer("militaryDefenceOnly", false);
+      setAnswer("personalNonProfessionalUse", false);
+      break;
+    case "prohibited":
+      setAnswer("socialScoring", false);
+      setAnswer("manipulativeTechniques", false);
+      setAnswer("vulnerabilityExploitation", false);
+      setAnswer("facialRecognitionDB", false);
+      setAnswer("emotionRecognitionWorkEdu", false);
+      setAnswer("biometricCategorisation", false);
+      setAnswer("realTimeBiometricId", false);
+      break;
+    case "gpai":
+      setAnswer("isGeneralPurposeModel", false);
+      break;
+    case "transparency":
+      setAnswer("interactsWithHumansDirectly", false);
+      break;
+    case "summary":
+      // No questions on summary step
+      break;
+    default:
+      // Other steps — fill nothing, they have conditionally-visible questions
+      break;
+  }
+}
+
 // ============================================================================
 // ST1: Initial State
 // ============================================================================
@@ -168,29 +211,54 @@ describe("ST3: nextStep()", () => {
   });
 
   it("navigates from company to role", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep();
     expect(useWizardStore.getState().currentStepId).toBe("role");
   });
 
   it("updates currentStep to match new step", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep();
     const state = useWizardStore.getState();
     expect(state.currentStep.id).toBe(state.currentStepId);
   });
 
   it("updates progress on navigation", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep();
     expect(useWizardStore.getState().progress).toBeGreaterThan(0);
   });
 
   it("navigates through multiple steps in sequence", () => {
-    const { nextStep } = useWizardStore.getState();
-    nextStep(); // company → role
+    fillStepAnswers("company");
+    useWizardStore.getState().nextStep(); // company → role
     expect(useWizardStore.getState().currentStepId).toBe("role");
+    fillStepAnswers("role");
     useWizardStore.getState().nextStep(); // role → system
     expect(useWizardStore.getState().currentStepId).toBe("system");
+    fillStepAnswers("system");
     useWizardStore.getState().nextStep(); // system → exclusions
     expect(useWizardStore.getState().currentStepId).toBe("exclusions");
+  });
+
+  it("does not navigate when required fields are empty", () => {
+    // Don't fill anything — should stay at company
+    useWizardStore.getState().nextStep();
+    expect(useWizardStore.getState().currentStepId).toBe("company");
+    expect(useWizardStore.getState().showValidation).toBe(true);
+    expect(useWizardStore.getState().validationErrors.length).toBeGreaterThan(0);
+  });
+
+  it("clears validation errors after filling and navigating", () => {
+    // Try without filling
+    useWizardStore.getState().nextStep();
+    expect(useWizardStore.getState().showValidation).toBe(true);
+    // Now fill and try again
+    fillStepAnswers("company");
+    useWizardStore.getState().nextStep();
+    expect(useWizardStore.getState().currentStepId).toBe("role");
+    expect(useWizardStore.getState().showValidation).toBe(false);
+    expect(useWizardStore.getState().validationErrors).toEqual([]);
   });
 
   it("skips hidden steps", () => {
@@ -199,22 +267,31 @@ describe("ST3: nextStep()", () => {
     // Navigate to prohibited step first
     useWizardStore.getState().goToStep("prohibited");
     expect(useWizardStore.getState().currentStepId).toBe("prohibited");
+    // Fill ALL visible prohibited questions so validation passes
+    const visibleQs = useWizardStore.getState().getVisibleQuestions();
+    for (const q of visibleQs) {
+      const fieldKey = typeof q.mapToField === "string" ? q.mapToField : q.id;
+      const currentVal = (useWizardStore.getState().answers as any)[fieldKey];
+      if (currentVal === undefined || currentVal === null) {
+        // Set boolean questions to false, text/number to a default
+        if (q.type === "BOOLEAN") useWizardStore.getState().setAnswer(fieldKey, false);
+        else if (q.type === "TEXT") useWizardStore.getState().setAnswer(fieldKey, "test");
+        else if (q.type === "NUMBER") useWizardStore.getState().setAnswer(fieldKey, 0);
+      }
+    }
+    // socialScoring is already true, re-set it
+    useWizardStore.getState().setAnswer("socialScoring", true);
     // Next should skip safetyComponent, annexIII, exception
     useWizardStore.getState().nextStep();
     expect(useWizardStore.getState().currentStepId).toBe("transparency");
   });
 
   it("triggers submitClassification at the last step", () => {
-    // Navigate to second-to-last visible step, then call nextStep
-    // The simplest way: go to the summary step predecessor
-    const visible = getVisibleSteps(useWizardStore.getState().answers);
-    const lastBeforeSummary = visible[visible.length - 2];
-    useWizardStore.getState().goToStep(lastBeforeSummary.id);
-    // Now nextStep from that step → summary
-    useWizardStore.getState().nextStep();
-    // We should be at summary now
+    // Navigate to the summary step directly (no validation on goToStep)
+    useWizardStore.getState().goToStep("summary");
     expect(useWizardStore.getState().currentStepId).toBe("summary");
     // nextStep from summary → no more steps → submitClassification called
+    // Summary step has no questions → validation passes
     useWizardStore.getState().nextStep();
     expect(mockClassify).toHaveBeenCalledTimes(1);
     expect(useWizardStore.getState().isComplete).toBe(true);
@@ -234,12 +311,14 @@ describe("ST4: prevStep()", () => {
   });
 
   it("navigates backward from role to company", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep(); // → role
     useWizardStore.getState().prevStep(); // → company
     expect(useWizardStore.getState().currentStepId).toBe("company");
   });
 
   it("updates currentStep on backward navigation", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep(); // → role
     useWizardStore.getState().prevStep(); // → company
     expect(useWizardStore.getState().currentStep.id).toBe("company");
@@ -254,6 +333,7 @@ describe("ST4: prevStep()", () => {
   });
 
   it("updates progress on backward navigation", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep(); // → role
     const progressBefore = useWizardStore.getState().progress;
     useWizardStore.getState().prevStep(); // → company
@@ -435,6 +515,7 @@ describe("ST7: reset()", () => {
   });
 
   it("resets progress to 0", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep();
     expect(useWizardStore.getState().progress).toBeGreaterThan(0);
     useWizardStore.getState().reset();
@@ -455,9 +536,12 @@ describe("ST7: reset()", () => {
   });
 
   it("allows re-navigation after reset", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep();
+    fillStepAnswers("role");
     useWizardStore.getState().nextStep();
     useWizardStore.getState().reset();
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep();
     expect(useWizardStore.getState().currentStepId).toBe("role");
   });
@@ -477,6 +561,7 @@ describe("ST8: getVisibleQuestions() — store computed", () => {
   });
 
   it("updates when step changes", () => {
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep(); // → role
     const questions = useWizardStore.getState().getVisibleQuestions();
     expect(questions[0].id).toBe("role");
@@ -547,12 +632,13 @@ describe("ST10: Full wizard flow integration", () => {
     state().setAnswer("companySize", "MEDIUM");
     state().setAnswer("isEUBased", true);
     state().setAnswer("role", "DEPLOYER");
+    state().setAnswer("systemDescription", "AI chatbot for testing");
     state().setAnswer("militaryDefenceOnly", false);
 
     // Navigate forward
-    state().nextStep(); // → role
-    state().nextStep(); // → system
-    state().nextStep(); // → exclusions
+    state().nextStep(); // → role (company answers filled)
+    state().nextStep(); // → system (role answer filled)
+    state().nextStep(); // → exclusions (systemDescription filled)
     expect(state().currentStepId).toBe("exclusions");
 
     // Go back
@@ -576,6 +662,7 @@ describe("ST10: Full wizard flow integration", () => {
     expect(state().isComplete).toBe(false);
 
     // Navigate again
+    fillStepAnswers("company");
     state().nextStep();
     expect(state().currentStepId).toBe("role");
   });
@@ -626,6 +713,7 @@ describe("ST10: Full wizard flow integration", () => {
     expect(useWizardStore.getState().isComplete).toBe(false);
 
     // Can still navigate
+    fillStepAnswers("company");
     useWizardStore.getState().nextStep(); // → role
     expect(useWizardStore.getState().currentStepId).toBe("role");
 

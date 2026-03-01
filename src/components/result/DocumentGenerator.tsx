@@ -18,14 +18,16 @@ type GenState = "idle" | "generating" | "done" | "error";
 
 export default function DocumentGenerator({
   result,
-  companyName,
-  systemDescription,
+  companyName: initialCompanyName,
+  systemDescription: initialSystemDescription,
 }: DocumentGeneratorProps) {
   const { isSignedIn } = useAuth();
   // If Clerk is not configured (isSignedIn === undefined), allow generation
   const canGenerate = isSignedIn !== false;
   const applicableIds = getApplicableTemplates(result);
 
+  const [companyName, setCompanyName] = useState(initialCompanyName || "");
+  const [systemDescription, setSystemDescription] = useState(initialSystemDescription || "");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     new Set(applicableIds)
   );
@@ -225,11 +227,48 @@ export default function DocumentGenerator({
               })}
             </div>
 
+            {/* Missing field prompts */}
+            {(!companyName.trim() || !systemDescription.trim()) && (
+              <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                <p className="text-sm font-medium text-amber-400 mb-3">
+                  Complete these fields to generate documents:
+                </p>
+                {!companyName.trim() && (
+                  <div className="mb-3">
+                    <label className="block text-xs text-[var(--color-text-muted)] mb-1">
+                      Company Name <span className="text-amber-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="e.g. Acme Corp"
+                      className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-brand-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+                {!systemDescription.trim() && (
+                  <div>
+                    <label className="block text-xs text-[var(--color-text-muted)] mb-1">
+                      AI System Description <span className="text-amber-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={systemDescription}
+                      onChange={(e) => setSystemDescription(e.target.value)}
+                      placeholder="e.g. AI chatbot for customer service"
+                      className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-brand-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Generate button — auth gated */}
             {canGenerate ? (
               <button
                 onClick={handleGenerate}
-                disabled={selectedIds.size === 0}
+                disabled={selectedIds.size === 0 || !companyName.trim() || !systemDescription.trim()}
                 className="mt-4 w-full rounded-xl bg-brand-600 py-3 font-semibold text-white hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Generate {selectedIds.size} Document{selectedIds.size !== 1 ? "s" : ""} + Executive Summary

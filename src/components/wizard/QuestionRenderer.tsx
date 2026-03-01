@@ -10,19 +10,29 @@ import { useState } from "react";
 
 interface Props {
   question: WizardQuestion;
+  showValidation?: boolean;
 }
 
-export default function QuestionRenderer({ question }: Props) {
+export default function QuestionRenderer({ question, showValidation }: Props) {
   const { answers, setAnswer } = useWizardStore();
   const fieldKey =
     typeof question.mapToField === "string" ? question.mapToField : question.id;
   const currentValue = (answers as any)[fieldKey];
 
+  // Determine if this field is missing a value
+  const isMissing = showValidation && (() => {
+    if (question.type === "TEXT") return !currentValue || (typeof currentValue === "string" && currentValue.trim() === "");
+    if (question.type === "BOOLEAN" || question.type === "SINGLE_SELECT") return currentValue === undefined || currentValue === null;
+    if (question.type === "NUMBER") return currentValue === undefined || currentValue === null || isNaN(currentValue);
+    return false;
+  })();
+
   return (
-    <div className="mb-6">
+    <div className={`mb-6 ${isMissing ? "rounded-xl ring-2 ring-amber-500/40 p-3 -m-3" : ""}`}>
       {/* Question text */}
       <label className="mb-2 block text-base font-medium leading-relaxed">
         {question.text}
+        {isMissing && <span className="ml-2 text-xs text-amber-400 font-normal">Required</span>}
       </label>
 
       {/* Help text */}

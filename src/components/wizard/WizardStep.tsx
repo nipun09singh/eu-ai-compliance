@@ -7,7 +7,7 @@ import { useWizardStore } from "@/lib/store";
 import QuestionRenderer from "./QuestionRenderer";
 
 export default function WizardStep() {
-  const { currentStep, nextStep, prevStep, currentStepId } = useWizardStore();
+  const { currentStep, nextStep, prevStep, currentStepId, validationErrors, showValidation } = useWizardStore();
   const visibleQuestions = useWizardStore((s) => s.getVisibleQuestions());
   const visibleSteps = useWizardStore((s) => s.getVisibleSteps());
 
@@ -34,8 +34,22 @@ export default function WizardStep() {
       ) : (
         <div className="space-y-2">
           {visibleQuestions.map((q) => (
-            <QuestionRenderer key={q.id} question={q} />
+            <QuestionRenderer key={q.id} question={q} showValidation={showValidation} />
           ))}
+        </div>
+      )}
+
+      {/* Validation errors */}
+      {showValidation && validationErrors.length > 0 && (
+        <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <p className="text-sm font-medium text-amber-400">
+            Please complete all questions before continuing:
+          </p>
+          <ul className="mt-1 list-inside list-disc text-xs text-amber-300/80">
+            {validationErrors.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
         </div>
       )}
 

@@ -30,6 +30,10 @@ interface WizardState {
   isComplete: boolean;
   progress: number;
 
+  // Validation
+  validationErrors: string[];
+  showValidation: boolean;
+
   // Actions
   setAnswer: (field: string, value: any) => void;
   nextStep: () => void;
@@ -41,6 +45,7 @@ interface WizardState {
   // Computed
   getVisibleQuestions: () => ReturnType<typeof getVisibleQuestions>;
   getVisibleSteps: () => WizardStep[];
+  getStepValidationErrors: () => string[];
 }
 
 const initialStep = WIZARD_STEPS[0];
@@ -52,6 +57,8 @@ export const useWizardStore = create<WizardState>((set, get) => ({
   result: null,
   isComplete: false,
   progress: 0,
+  validationErrors: [],
+  showValidation: false,
 
   setAnswer: (field: string, value: any) => {
     set((state) => {
@@ -65,6 +72,15 @@ export const useWizardStore = create<WizardState>((set, get) => ({
 
   nextStep: () => {
     const { currentStepId, answers } = get();
+
+    // Validate current step before proceeding
+    const errors = get().getStepValidationErrors();
+    if (errors.length > 0) {
+      set({ validationErrors: errors, showValidation: true });
+      return;
+    }
+
+    set({ validationErrors: [], showValidation: false });
     const next = getNextStep(currentStepId, answers);
     if (next) {
       set({
@@ -120,6 +136,8 @@ export const useWizardStore = create<WizardState>((set, get) => ({
       result: null,
       isComplete: false,
       progress: 0,
+      validationErrors: [],
+      showValidation: false,
     });
   },
 
@@ -131,5 +149,37 @@ export const useWizardStore = create<WizardState>((set, get) => ({
   getVisibleSteps: () => {
     const { answers } = get();
     return getVisibleSteps(answers);
+  },
+
+  getStepValidationErrors: () => {
+    const { currentStep, answers } = get();
+    const visible = getVisibleQuestions(currentStep, answers);
+    const errors: string[] = [];
+
+    for (const q of visible) {
+      const fieldKey = typeof q.mapToField === "string" ? q.mapToField : q.id;
+      const value = (answers as any)[fieldKey];
+
+      // TEXT fields must be non-empty strings
+      if (q.type === "TEXT") {
+        if (!value || (typeof value === "string" && value.trim() === "")) {
+          errors.push(`Please answer: ${q.text}`);
+        }
+      }
+      // BOOLEAN & SINGLE_SELECT must have a selection
+      else if (q.type === "BOOLEAN" || q.type === "SINGLE_SELECT") {
+        if (value === undefined || value === null) {
+          errors.push(`Please answer: ${q.text}`);
+        }
+      }
+      // NUMBER must be defined
+      else if (q.type === "NUMBER") {
+        if (value === undefined || value === null || isNaN(value)) {
+          errors.push(`Please answer: ${q.text}`);
+        }
+      }
+    }
+
+    return errors;
   },
 }));
