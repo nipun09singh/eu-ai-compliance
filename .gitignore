@@ -27,3 +27,4 @@ e2e/visual-regression.spec.ts-snapshots/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.vercel

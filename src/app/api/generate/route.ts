@@ -42,13 +42,17 @@ export async function POST(request: NextRequest) {
       systemDescription: string;
     };
 
-    // Validate required fields
-    if (!templateId || !result || !companyName || !systemDescription) {
+    // Validate required fields (companyName and systemDescription get defaults)
+    if (!templateId || !result) {
       return NextResponse.json(
-        { error: "Missing required fields: templateId, result, companyName, systemDescription" },
+        { error: "Missing required fields: templateId, result" },
         { status: 400 }
       );
     }
+
+    const resolvedCompanyName = companyName || "Your Company";
+    const resolvedSystemDescription =
+      systemDescription || `AI system classified as ${result.classification} under EU AI Act`;
 
     // Validate template exists (unless executive summary)
     if (templateId !== "EXEC_SUMMARY" && !TEMPLATE_REGISTRY[templateId]) {
@@ -61,8 +65,8 @@ export async function POST(request: NextRequest) {
     // Generate the document
     const doc =
       templateId === "EXEC_SUMMARY"
-        ? await generateExecutiveSummary(result, companyName, systemDescription)
-        : await generateDocument(templateId, result, companyName, systemDescription);
+        ? await generateExecutiveSummary(result, resolvedCompanyName, resolvedSystemDescription)
+        : await generateDocument(templateId, result, resolvedCompanyName, resolvedSystemDescription);
 
     return NextResponse.json({ document: doc });
   } catch (error) {

@@ -213,16 +213,16 @@ describe("R2: POST — Field Validation", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 when companyName is missing", async () => {
+  it("uses default when companyName is missing", async () => {
     const { companyName, ...rest } = VALID_BODY;
     const res = await POST(makePostRequest(rest));
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
   });
 
-  it("returns 400 when systemDescription is missing", async () => {
+  it("uses default when systemDescription is missing", async () => {
     const { systemDescription, ...rest } = VALID_BODY;
     const res = await POST(makePostRequest(rest));
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
   });
 
   it("returns 400 when body is empty", async () => {
@@ -235,14 +235,14 @@ describe("R2: POST — Field Validation", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 when companyName is empty string", async () => {
+  it("uses default when companyName is empty string", async () => {
     const res = await POST(makePostRequest({ ...VALID_BODY, companyName: "" }));
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
   });
 
-  it("returns 400 when systemDescription is empty string", async () => {
+  it("uses default when systemDescription is empty string", async () => {
     const res = await POST(makePostRequest({ ...VALID_BODY, systemDescription: "" }));
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
   });
 
   it("accepts request with all valid fields", async () => {
