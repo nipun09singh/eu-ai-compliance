@@ -1,0 +1,85 @@
+Great question — and honestly more important than the code. A world-class product with zero distribution is worth nothing. Here's what actually works for a solo founder selling B2B compliance to SMBs:
+
+## Why would someone use YOUR product?
+
+**The honest answer: Fear + Deadline + Price.**
+
+- **Aug 2026 is ~5 months away.** Every EU company using AI is about to face mandatory compliance with fines up to €15M. Most SMBs haven't even started. They're scared and don't know where to begin.
+- **Alternatives cost €10K-50K+/year** (Vanta, OneTrust) or €200-500/hr for a consultant. You're €99/month.
+- **You give them a clear answer in 15 minutes** — "You're HIGH-RISK, here are your 16 obligations, here's your deadline, here's your fine risk." Nobody else does that for SMBs.
+
+The product sells itself IF you put it in front of the right people. The question is how.
+
+## Customer Acquisition Playbook (Solo Founder, €0 Budget)
+
+### 1. FREE CLASSIFICATION = Your Growth Engine
+This is your single most important decision. The wizard is **free, no sign-up required**. Why:
+- Someone Googles "EU AI Act compliance check" → lands on your site → gets classified in 15 minutes → sees "HIGH-RISK, €15M fine, 5 months" → **panic** → sees "Get compliant for €99/month" → pays
+- Every free classification is a warm lead. You have their company name, AI system description, and risk level
+- This is the Calendly/Typeform model — free tool that's genuinely useful, paid upgrade for the full solution
+
+### 2. SEO — Your #1 Channel (Weeks 1-8)
+These people are actively searching RIGHT NOW:
+- "EU AI Act compliance check" — no good tool exists
+- "EU AI Act SMB requirements" — articles but no product
+- "AI Act high risk classification" — only legal jargon results
+- "EU AI Act fines" — fear-driven, high intent
+- "AI Act Article 6 high risk" — specific, buyer-intent
+- "EU AI Act deadline 2026" — urgency
+
+**Action**: Write 10-15 SEO-optimized pages targeting these keywords. Each page ends with "Check your AI system's classification for free →". You're not competing with Vanta for SEO — they don't target AI Act keywords because they don't have the product.
+
+### 3. LinkedIn — Your #2 Channel (Daily, 30 min)
+Your buyer persona: CTO/CPO/DPO/Head of AI at EU companies with 10-500 employees. They're all on LinkedIn.
+
+**What to post (3-5x/week):**
+- "I classified 100 AI systems under the EU AI Act. 73% were HIGH-RISK and didn't know it. Here's why..."
+- "Your company uses ChatGPT API? You're a DEPLOYER under the AI Act. Here are your 8 obligations..."
+- "The EU AI Act fines start at €15M. But if you're an SME, here's the clause they don't tell you about..."
+- Break down one article of the Act per post in plain language
+- Share real (anonymised) classification results
+
+**This works because**: Nobody is making AI Act content accessible. Lawyers write in legalese. You translate it into "here's what this means for your startup." That's valuable.
+
+### 4. Communities (Where Your Buyers Already Are)
+Go where EU tech founders/CTOs hang out:
+- **Hacker News** — Post "Show HN: Free EU AI Act compliance checker" → this will get traction because it's a real tool solving a real problem
+- **Reddit** — r/europes, r/startups, r/artificial, r/GDPR (yes, same audience)
+- **Slack/Discord communities** — EU Startups, SaaS Europe, AI communities
+- **Enterprise Ireland / LEO** — you're in Dublin, tap their networks
+- **Local meetups** — Dublin Tech Summit, AI Ireland, Web Summit (Lisbon, but EU ecosystem)
+
+### 5. Partnerships (Multiplier Effect)
+People who already have your customers:
+- **Law firms** doing AI Act advisory → they charge €300/hr and hate the grunt work. Your tool does the classification, they do the legal review. Referral deal.
+- **DPO-as-a-service companies** → they already handle GDPR. AI Act is their natural upsell. White-label or referral.
+- **Cloud providers' startup programs** → AWS, Google Cloud, Microsoft for Startups partner pages
+- **Accounting/audit firms** → they're being asked about AI Act by clients and have no answer
+
+### 6. The "Aug 2026 Countdown" Play
+**This is your unfair timing advantage.** In the next 5 months:
+- Every EU tech publication will write about the AI Act deadline
+- Every CTO will panic-search "am I compliant"
+- Every DPO will get asked "what do we need to do about AI"
+- Compliance consultants will be booked solid and expensive
+
+You need to be THE free tool that everyone links to when they say "start here."
+
+## Realistic Customer Acquisition Timeline
+
+| Month | Channel | Target | Revenue |
+|-------|---------|--------|---------|
+| Month 1 | Launch free tool + Show HN + LinkedIn | 500 free classifications, 10 paid | €1K |
+| Month 2 | SEO pages ranking + LinkedIn growth | 2K free, 30 paid | €3K |
+| Month 3 | First law firm partnership + content flywheel | 5K free, 80 paid | €8K |
+| Month 4 | **Pre-deadline panic starts** | 15K free, 200 paid | €20K |
+| Month 5 | **Deadline month — peak demand** | 30K free, 500 paid | €50K |
+| Month 6+ | Post-deadline ongoing compliance | Retention + growth | €60K+/mo |
+
+## The One Thing That Matters Most
+
+**Ship the free classification wizard FAST and make it shareable.** Every person who runs it and gets "HIGH-RISK" will share it with their CTO, their DPO, their co-founders. The product IS the marketing.
+
+Don't spend weeks perfecting templates. Get the wizard live, the result page scary-accurate, and a "Share with your team" button. That's your growth loop.
+
+Want me to start building the Next.js app with the free wizard as the landing page?
